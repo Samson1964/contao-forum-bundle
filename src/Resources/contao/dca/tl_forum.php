@@ -22,7 +22,7 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 	(
 		'label'                       => $GLOBALS['TL_LANG']['tl_forum']['maintitle'],
 		'dataContainer'               => 'Table',
-        'switchToEdit'                => true,
+		'switchToEdit'                => true,
 		'ctable'                      => array('tl_forum_threads'),
 		'enableVersioning'            => true,
 		'onload_callback'             => array
@@ -282,21 +282,21 @@ class tl_forum extends Backend
 		$breadcrumb = array();
 		if($cat) // Nur bei Unterkategorien
 		{
-			// Kategorienbaum einschränken
+			// Kategorienbaum einschrÃ¤nken
 			$GLOBALS['TL_DCA']['tl_forum']['list']['sorting']['root'] = array($cat);
 		
 			// Infos zur aktuellen Kategorie laden
 			$objActual = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
 							   				     ->execute(1, $cat);
-			$breadcrumb[] = '<img src="system/modules/forum/assets/images/category.png" width="18" height="18" alt=""> ' . $objActual->title;
+			$breadcrumb[] = '<img src="bundles/contaoforum/images/category.png" width="18" height="18" alt=""> ' . $objActual->title;
 			
-			// Navigation vervollständigen
+			// Navigation vervollstÃ¤ndigen
 			$pid = $objActual->pid;
 			while($pid > 0)
 			{
 				$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
 								   			       ->execute(1, $pid);
-				$breadcrumb[] = '<img src="system/modules/forum/assets/images/category.png" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node='.$objTemp->id) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'">' . $objTemp->title . '</a>';
+				$breadcrumb[] = '<img src="bundles/contaoforum/images/category.png" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node='.$objTemp->id) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'">' . $objTemp->title . '</a>';
 				$pid = $objTemp->pid;
 			}
 			$breadcrumb[] = '<img src="' . TL_FILES_URL . 'system/themes/' . \Backend::getTheme() . '/images/pagemounts.gif" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node=0') . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectAllNodes']).'">' . $GLOBALS['TL_LANG']['MSC']['filterAll'] . '</a>';
@@ -332,7 +332,7 @@ class tl_forum extends Backend
 			$row['protected'] = true;
 		}
 
-		$image = 'system/modules/forum/assets/images/category.png';
+		$image = 'bundles/contaoforum/images/category.png';
 		$imageAttribute = trim($imageAttribute . ' data-icon="category.png" data-icon-disabled="category.png"');
 
 		// Return the image only
@@ -347,7 +347,7 @@ class tl_forum extends Backend
 			$label = '<strong>' . $label . '</strong>';
 		}
 
-		// Rückgabe der Zeile
+		// RÃ¼ckgabe der Zeile
 		return \Image::getHtml($image, '', $imageAttribute) . '<a href="' . \Controller::addToUrl('node='.$row['id']) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'"> ' . $label . '</a> 
 		(<b>'.$row['links_self'].'</b>/'.$row['links_all'].')';
 

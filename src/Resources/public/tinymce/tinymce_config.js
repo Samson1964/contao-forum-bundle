@@ -1,6 +1,6 @@
 tinyMCE.init({
 	// General options
-	mode : "textareas",
+	selector: "textarea#forum",
 	theme : "advanced",
 	skin: "default",
 	height: "400",

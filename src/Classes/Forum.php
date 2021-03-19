@@ -86,8 +86,8 @@ class Forum extends \Module
 		
 		// ID's der Topics einlesen für Auswertung "Gelesen Ja/Nein"
 		$objTopics = \Database::getInstance()->prepare('SELECT p.id AS topic, t.pid AS category, t.id AS thread FROM tl_forum_topics p INNER JOIN tl_forum_threads t ON (p.pid = t.id) WHERE p.published = ?')
- 						   				     ->execute(1);
- 		// ID's vergleichen und ungelesene ID's speichern
+		                                     ->execute(1);
+		// ID's vergleichen und ungelesene ID's speichern
 		$exist_topics = array();
 		$topic = array();
 		if($objTopics->numRows > 0)
@@ -97,8 +97,8 @@ class Forum extends \Module
 				$exist_topics[] = $objTopics->topic;
 				$topic[$objTopics->topic] = array
 				(
-					'category'	=> $objTopics->category,
-					'thread'	=> $objTopics->thread
+					'category'  => $objTopics->category,
+					'thread'    => $objTopics->thread
 				);
 			}
 		}			
@@ -122,7 +122,7 @@ class Forum extends \Module
 		*/
 
 		$objMembers = \Database::getInstance()->prepare('SELECT id, email, firstname, lastname, username FROM tl_member')
- 						   				      ->execute();
+		                                      ->execute();
 			
 		if($objMembers->numRows > 0)
 		{
@@ -148,19 +148,19 @@ class Forum extends \Module
 		{
 			// Titel des Threads laden
 			$objThread = \Database::getInstance()->prepare('SELECT title, pid FROM tl_forum_threads WHERE id = ?')
-							   				     ->execute(\Input::get('thread'));
+			                                     ->execute(\Input::get('thread'));
 			if($objThread->numRows == 0)
 			{
 				// Thread nicht gefunden, 404 ausgeben
 				$objHandler = new $GLOBALS['TL_PTY']['error_404']();
-                $objHandler->generate($objPage->id); 				
+				$objHandler->generate($objPage->id); 				
 			}
 			
 			$this->cat = $objThread->pid;
 
 			// Topics des aktuellen Threads laden
 			$objTopics = \Database::getInstance()->prepare('SELECT t.id, t.text, m.username, t.topicdate FROM tl_forum_topics t INNER JOIN tl_member m ON (t.name = m.id) WHERE published = ? AND pid = ? ORDER BY topicdate ASC')
- 						   				         ->execute(1, \Input::get('thread'));
+			                                     ->execute(1, \Input::get('thread'));
 			
 			$topics = array();
 			$arrRead = array();
@@ -174,10 +174,10 @@ class Forum extends \Module
 					$class = ($class == 'odd') ? 'even' : 'odd';
 					$topics[] = array
 					(
-						'text' 		=> $this->showBBcodes($objTopics->text),
-						'name'	 	=> $objTopics->username.$newstatus,
-						'topicdate'	=> date("d.m.Y H:i", $objTopics->topicdate),
-						'class' 	=> $class,
+						'text'      => $this->showBBcodes($objTopics->text),
+						'name'      => $objTopics->username.$newstatus,
+						'topicdate' => date("d.m.Y H:i", $objTopics->topicdate),
+						'class'     => $class,
 					);
 				}
 			}
@@ -207,18 +207,18 @@ class Forum extends \Module
 			
 			// Aktuelle Kategorien laden
 			$objCategory = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
-												   ->execute(1, $this->cat);
+			                                       ->execute(1, $this->cat);
 
 			if($objCategory->numRows == 0)
 			{
 				// Kategorie nicht gefunden, 404 ausgeben
 				$objHandler = new $GLOBALS['TL_PTY']['error_404']();
-                $objHandler->generate($objPage->id); 				
+				$objHandler->generate($objPage->id); 				
 			}
 
 			// Unterkategorien laden
 			$objCategories = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND pid = ? ORDER BY sorting ASC')
-													 ->execute(1, $this->cat);
+			                                         ->execute(1, $this->cat);
 			
 			$categories = array();
 			if($objCategories->numRows > 0)
@@ -231,9 +231,9 @@ class Forum extends \Module
 					$class = ($class == 'odd') ? 'even' : 'odd';
 					$categories[] = array
 					(
-						'title' 	=> $objCategories->title.$newstatus,
-						'link'  	=> \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objCategories->id),
-						'class' 	=> $class,
+						'title'     => $objCategories->title.$newstatus,
+						'link'      => \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objCategories->id),
+						'class'     => $class,
 					);
 				}
 			}
@@ -242,7 +242,7 @@ class Forum extends \Module
 			{
 				// Threads der aktuellen Kategorie laden
 				$objThreads = \Database::getInstance()->prepare('SELECT t.id, t.title, m.username, t.actname, t.actdate, t.initdate FROM tl_forum_threads t INNER JOIN tl_member m ON (t.name = m.id) WHERE published = ? AND pid = ? ORDER BY actdate DESC')
-													  ->execute(1, $this->cat);
+				                                      ->execute(1, $this->cat);
 				
 				$threads = array();
 				if($objThreads->numRows > 0)
@@ -255,13 +255,13 @@ class Forum extends \Module
 						$class = ($class == 'odd') ? 'even' : 'odd';
 						$threads[] = array
 						(
-							'title' 	=> $objThreads->title.$newstatus,
-							'link'  	=> \Controller::generateFrontendUrl($objPage->row(), '/thread/'.$objThreads->id),
-							'name'	 	=> $objThreads->username,
-							'actname'	=> $this->member[$objThreads->actname]['username'],
-							'actdate'	=> date("d.m.Y H:i", $objThreads->actdate),
-							'initdate'	=> date("d.m.Y H:i", $objThreads->initdate),
-							'class' 	=> $class,
+							'title'     => $objThreads->title.$newstatus,
+							'link'      => \Controller::generateFrontendUrl($objPage->row(), '/thread/'.$objThreads->id),
+							'name'      => $objThreads->username,
+							'actname'   => $this->member[$objThreads->actname]['username'],
+							'actdate'   => date("d.m.Y H:i", $objThreads->actdate),
+							'initdate'  => date("d.m.Y H:i", $objThreads->initdate),
+							'class'     => $class,
 						);
 					}
 				}
@@ -277,50 +277,50 @@ class Forum extends \Module
 
 			$objForm = new \Haste\Form\Form('threadform', 'POST', function($objHaste) 
 			{
-        		$temp .= \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
-    			//print_r($_FILES);
-    		    $arrData = $objHaste->fetchAll();
-    			$temp .= print_r($arrData, true);
-    		});
-
-    		// Formular auswerten nachdem es abgeschickt wurde
-    		if ($objForm->validate()){
-    		    
-    		    $arrData = $objForm->fetchAll();
-    		
-    			$temp .= print_r($arrData, true);
-    			//print_r($arrData);
-    		}       
-    		
-    		$objForm->addFormField('year', array
-    		(
-        		'label'         => 'Year',
-        		'inputType'     => 'text',
-        		'eval'          => array('mandatory'=>true, 'rgxp'=>'digit')
-    		));
+				$temp .= \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
+				//print_r($_FILES);
+			    $arrData = $objHaste->fetchAll();
+				$temp .= print_r($arrData, true);
+			});
+			
+			// Formular auswerten nachdem es abgeschickt wurde
+			if ($objForm->validate()){
+			    
+			    $arrData = $objForm->fetchAll();
+			
+				$temp .= print_r($arrData, true);
+				//print_r($arrData);
+			}       
+			
+			$objForm->addFormField('year', array
+			(
+				'label'         => 'Year',
+				'inputType'     => 'text',
+				'eval'          => array('mandatory'=>true, 'rgxp'=>'digit')
+			));
 			$objForm->addFormField('file_upload', array
 			(
-     			'label'         => 'Datei-Upload',
-     			'inputType'     => 'upload',
-     			'eval'          => array('extensions'=>'jpg,jpeg,gif,png,pdf', 'storeFile'=>true, 'uploadFolder'=>$this->User->homeDir, 'doNotOverwrite' => true, 'maxlength' => 2048000)
+				'label'         => 'Datei-Upload',
+				'inputType'     => 'upload',
+				'eval'          => array('extensions'=>'jpg,jpeg,gif,png,pdf', 'storeFile'=>true, 'uploadFolder'=>$this->User->homeDir, 'doNotOverwrite' => true, 'maxlength' => 2048000)
 			));  
-    		// Need a checkbox?
-    		$objForm->addFormField('termsOfUse', array
-    		(
-    		    'label'         => array('This is the <legend>', 'This is the <label>'),
-    		    'inputType'     => 'checkbox',
-    		    'eval'          => array('mandatory'=>true)
-    		));
-    		// Let's add  a submit button
-    		$objForm->addFormField('submit', array
-    		(
-    		  	'label'     	=> 'Submit form',
-    		  	'inputType' 	=> 'submit'
-    		));
-    
+			// Need a checkbox?
+			$objForm->addFormField('termsOfUse', array
+			(
+			    'label'         => array('This is the <legend>', 'This is the <label>'),
+			    'inputType'     => 'checkbox',
+			    'eval'          => array('mandatory'=>true)
+			));
+			// Let's add  a submit button
+			$objForm->addFormField('submit', array
+			(
+			  	'label'     	=> 'Submit form',
+			  	'inputType' 	=> 'submit'
+			));
+			
 			//if($this->User->id == 2) $this->Template->debug = $temp . $objForm->generate();
 			//if($this->User->id == 2) $this->Template->debug = ' ';
-    
+			
 		}
 
 	}

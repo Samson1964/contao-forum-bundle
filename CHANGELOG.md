@@ -1,5 +1,11 @@
 # Forum Changelog
 
+## Version 0.0.3 (2021-03-19)
+
+* Fix: TinyMCE-Konfiguration geändert. TinyMCE wirkte sich auf alle Textareas aus. selector: "textarea#forum" statt mode: "textarea"
+* Fix: Templates, Pfade korrigiert von system/modules auf bundles
+* Fix: dca/tl_forum.php, Pfade korrigiert von system/modules auf bundles
+
 ## Version 0.0.2 (2020-09-14)
 
 * Fix Plugin.php

@@ -31,7 +31,7 @@
 		<h2>Bild hochladen</h2>
 		<form id="uploadimage" action="" method="post" enctype="multipart/form-data">
 			<div id="selectImage">
-			<div id="image_preview"><img id="previewing" src="system/modules/forum/assets/images/noimage.png" /></div>
+			<div id="image_preview"><img id="previewing" src="bundles/contaoforum/images/noimage.png" /></div>
 			<label>Hier kannst Du ein Bild hochladen</label><br/>
 			<input type="file" name="file" id="file" required />
 			<input type="submit" value="Hochladen" class="submit" />

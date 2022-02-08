@@ -24,10 +24,7 @@ $GLOBALS['BE_MOD']['content']['forum'] = array
 /**
  * Frontend-Module
  */
-$GLOBALS['FE_MOD']['forum'] = array
-(
-	'forum'          => 'Schachbulle\ContaoForumBundle\Classes\Forum',
-);  
+$GLOBALS['FE_MOD']['application']['forum'] = 'Schachbulle\ContaoForumBundle\Modules\Forum';  
 
 // Standard-CSS einbinden
 if(TL_MODE == 'FE') 

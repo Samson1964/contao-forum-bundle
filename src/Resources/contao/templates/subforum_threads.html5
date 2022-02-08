@@ -6,9 +6,6 @@
 		<div class="categories block">
 		<table class="categories">
 			<?php foreach($this->categories as $b): ?>
-				<tr>
-					<td class="abstand"></td>
-				</tr>
 				<tr class="<?= $b['class'] ?>">
 					<td class="title"><a href="<?= $b['link'] ?>"><?= $b['title'] ?></a></td>
 				</tr>
@@ -42,20 +39,13 @@
 	<?php if($this->form): ?>
 		<div class="form block">
 		<h2>Thema anlegen</h2>
-		<b>Angemeldet als <?= $this->username ?></b>
+		<?php if($this->username): ?>
+			<b>Angemeldet als <?= $this->username ?></b>
+		<?php else: ?>
+			<b>Du schreibst als Gast!</b>
+		<?php endif; ?>
 			<?= $this->form ?>
 		</div>
-		<h2>Bild hochladen</h2>
-		<form id="uploadimage" action="" method="post" enctype="multipart/form-data">
-			<div id="selectImage">
-			<div id="image_preview"><img id="previewing" src="bundles/contaoforum/images/noimage.png" /></div>
-			<label>Hier kannst Du ein Bild hochladen</label><br/>
-			<input type="file" name="file" id="file" required />
-			<input type="submit" value="Hochladen" class="submit" />
-			</div>
-		</form>
-		<h4 id='loading' >Lade..</h4>
-		<div id="message"></div>
 	<?php endif; ?>
 
 	<?php if($this->debug): ?>

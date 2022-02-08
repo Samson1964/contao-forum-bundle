@@ -267,7 +267,7 @@ class Formular extends \Controller
 			{
 				$this->rteFields = implode(',',$rteFields);
 				ob_start();
-				include(TL_ROOT.'/system/config/'.$cfg.'.php');
+				//include(TL_ROOT.'/system/config/'.$cfg.'.php');
 				$html .= ob_get_clean();		
 			}
 		}
@@ -492,7 +492,7 @@ window.addEvent(\'domready\', function() { ' . implode("\n",$arrDatepicker) . ' 
 	 */
 	public function parse($arrAttribs = array())
 	{
-		$this->Template = new FrontendTemplate($this->formTemplate);
+		$this->Template = new \FrontendTemplate($this->formTemplate);
 		$this->Template->setData($arrAttribs);
 		
 		list($hidden,$fields) = $this->generate(true);

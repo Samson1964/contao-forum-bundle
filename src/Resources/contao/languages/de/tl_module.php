@@ -10,10 +10,7 @@
 /**
  * Back end modules
  */
-$GLOBALS['TL_LANG']['tl_module']['options_legend'] = 'Einstellungen';
+$GLOBALS['TL_LANG']['tl_module']['forum_legend'] = 'Forum-Einstellungen';
 
-$GLOBALS['TL_LANG']['tl_module']['forum_category'][0] = 'Startkategorie';
-$GLOBALS['TL_LANG']['tl_module']['forum_category'][1] = 'Ab dieser Kategorie wird das Forum angezeigt.';
-
-$GLOBALS['TL_LANG']['tl_module']['forum_allpost'][0] = 'Überall schreiben';
-$GLOBALS['TL_LANG']['tl_module']['forum_allpost'][1] = 'Themen können in allen und nicht nur in der untersten Kategorie angelegt werden.';
+$GLOBALS['TL_LANG']['tl_module']['forum_category'] = array('Startforum', 'Forum, das als Startpunkt genutzt werden soll.');
+$GLOBALS['TL_LANG']['tl_module']['forum_allpost'] = array('Überall schreiben', 'Themen können auch im Startforum erstellt werden.');

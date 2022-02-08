@@ -34,8 +34,7 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 			'keys'                    => array
 			(
 				'id'                  => 'primary',
-				'pid'                 => 'index',
-				'alias'               => 'index'
+				'pid'                 => 'index'
 			)
 		)
 	),
@@ -120,15 +119,16 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 	// Palettes
 	'palettes' => array
 	(
-		'__selector__'                => array('protected'), 
-		'default'                     => '{title_legend},title,alias;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space;{published_legend},published,start,stop'
+		'__selector__'                => array('define_groups','define_rights'),
+		'default'                     => '{title_legend},title;{groups_legend:hide},define_groups;{rights_legend:hide},define_rights;{publish_legend},published'
 	), 
 
 	// Subpalettes
 	'subpalettes' => array
 	(
-		'protected'                   => 'groups'
-	), 
+		'define_groups'               => 'member_groups,admin_groups,default_author',
+		'define_rights'               => 'guest_rights,member_rights,admin_rights',
+	),
 	
 	// Fields
 	'fields' => array
@@ -160,62 +160,68 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 			'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'decodeEntities'=>true),
 			'sql'                     => "varchar(255) NOT NULL default ''"
 		),
-		'alias' => array
+		'define_groups' => array
 		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['alias'],
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['define_groups'],
 			'exclude'                 => true,
-			'inputType'               => 'text',
-			'search'                  => true,
-			'eval'                    => array('rgxp'=>'folderalias', 'doNotCopy'=>true, 'maxlength'=>128, 'tl_class'=>'w50'),
-			'sql'                     => "varbinary(128) NOT NULL default ''",
-			'save_callback' => array
-			(
-				array('tl_forum', 'generateAlias')
-			), 
-		),
-		'protected' => array
-		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['protected'],
-			'exclude'                 => true,
-			'filter'                  => true,
+			'default'                 => '',
 			'inputType'               => 'checkbox',
 			'eval'                    => array('submitOnChange'=>true),
 			'sql'                     => "char(1) NOT NULL default ''"
 		),
-		'groups' => array
+		'member_groups' => array
 		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['groups'],
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['member_groups'],
 			'exclude'                 => true,
 			'inputType'               => 'checkbox',
 			'foreignKey'              => 'tl_member_group.name',
-			'eval'                    => array('mandatory'=>true, 'multiple'=>true),
-			'sql'                     => "blob NULL",
-			'relation'                => array('type'=>'hasMany', 'load'=>'lazy')
+			'eval'                    => array('mandatory'=>false, 'multiple'=>true),
+			'sql'                     => "blob NULL"
 		),
-		'guests' => array
+		'admin_groups' => array
 		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['guests'],
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['admin_groups'],
 			'exclude'                 => true,
-			'filter'                  => true,
 			'inputType'               => 'checkbox',
-			'eval'                    => array('tl_class'=>'w50'),
+			'foreignKey'              => 'tl_member_group.name',
+			'eval'                    => array('mandatory'=>false, 'multiple'=>true),
+			'sql'                     => "blob NULL"
+		),
+		'define_rights' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['define_rights'],
+			'exclude'                 => true,
+			'default'                 => '',
+			'inputType'               => 'checkbox',
+			'eval'                    => array('submitOnChange'=>true),
 			'sql'                     => "char(1) NOT NULL default ''"
 		),
-		'cssID' => array
+		'guest_rights' => array
 		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['cssID'],
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['guest_rights'],
 			'exclude'                 => true,
-			'inputType'               => 'text',
-			'eval'                    => array('multiple'=>true, 'size'=>2, 'tl_class'=>'w50 clr'),
-			'sql'                     => "varchar(255) NOT NULL default ''"
+			'inputType'               => 'checkbox',
+			//'options_callback'        => array('tl_forum','getGuestRightList'),
+			'eval'                    => array('mandatory'=>false, 'multiple'=>true),
+			'sql'                     => "blob NULL"
 		),
-		'space' => array
+		'member_rights' => array
 		(
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['space'],
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['member_rights'],
 			'exclude'                 => true,
-			'inputType'               => 'text',
-			'eval'                    => array('multiple'=>true, 'size'=>2, 'rgxp'=>'digit', 'nospace'=>true, 'tl_class'=>'w50'),
-			'sql'                     => "varchar(64) NOT NULL default ''"
+			'inputType'               => 'checkbox',
+			//'options_callback'        => array('tl_forum','getRightList'),
+			'eval'                    => array('mandatory'=>false, 'multiple'=>true),
+			'sql'                     => "blob NULL"
+		),
+		'admin_rights' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['admin_rights'],
+			'exclude'                 => true,
+			'inputType'               => 'checkbox',
+			//'options_callback'        => array('tl_forum','getRightList'),
+			'eval'                    => array('mandatory'=>false, 'multiple'=>true),
+			'sql'                     => "blob NULL"
 		),
 		'published' => array
 		(
@@ -225,22 +231,6 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 			'eval'                    => array('doNotCopy'=>true),
 			'sql'                     => "char(1) NOT NULL default ''"
 		), 
-		'start' => array
-		(
-			'exclude'                 => true,
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['start'],
-			'inputType'               => 'text',
-			'eval'                    => array('rgxp'=>'datim', 'datepicker'=>true, 'tl_class'=>'w50 wizard'),
-			'sql'                     => "varchar(10) NOT NULL default ''"
-		),
-		'stop' => array
-		(
-			'exclude'                 => true,
-			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['stop'],
-			'inputType'               => 'text',
-			'eval'                    => array('rgxp'=>'datim', 'datepicker'=>true, 'tl_class'=>'w50 wizard'),
-			'sql'                     => "varchar(10) NOT NULL default ''"
-		) 
 	)
 );
 
@@ -353,40 +343,6 @@ class tl_forum extends Backend
 
 	}
 
-	/**
-	 * Auto-generate a page alias if it has not been set yet
-	 * @param mixed
-	 * @param \DataContainer
-	 * @return string
-	 * @throws \Exception
-	 */
-	public function generateAlias($varValue, DataContainer $dc)
-	{
-		$autoAlias = false;
-
-		// Generate an alias if there is none
-		if ($varValue == '')
-		{
-			$autoAlias = true;
-			$varValue = standardize(StringUtil::restoreBasicEntities($dc->activeRecord->title));
-		}
-
-		$objAlias = $this->Database->prepare("SELECT id FROM tl_forum WHERE id=? OR alias=?")
-								   ->execute($dc->id, $varValue);
-
-		// Check whether the page alias exists
-		if ($objAlias->numRows > 1)
-		{
-			if (!$autoAlias)
-			{
-				throw new Exception(sprintf($GLOBALS['TL_LANG']['ERR']['aliasExists'], $varValue));
-			}
-
-			$varValue .= '-' . $dc->id;
-		}
-
-		return $varValue;
-	} 
 
 	/**
 	 * Return the "toggle visibility" button

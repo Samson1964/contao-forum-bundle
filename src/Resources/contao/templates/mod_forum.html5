@@ -1,0 +1,14 @@
+<?php $this->extend('block_unsearchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<?php if($this->daten): ?>
+	<b>Wir gratulieren:</b>
+	<ul>
+	<?php foreach($this->daten as $item): ?>
+		<li><?= $item ?></li>
+	<?php endforeach; ?>
+	</ul>
+<?php endif; ?>
+
+<?php $this->endblock(); ?>

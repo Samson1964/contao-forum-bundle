@@ -1,117 +1,117 @@
 /* Forumansicht */
 .mod_forum a
 {
-	text-decoration			: none;
+	text-decoration: none;
 }
 
 .mod_forum input[type=text]
 {
-	width					: 98%;
-	padding					: 5px;
-	border-radius			: 7px;
+	width: 98%;
+	padding: 5px;
+	border-radius: 7px;
 }
 
 .mod_forum td
 {
-	vertical-align			: top;
+	vertical-align: top;
 }
 
 .mod_forum td.abstand
 {
-	height					: 5px;
+	height: 5px;
 }
 
 .mod_forum tr.odd
 {
- 	background-color   		: #DADADA; 
+ 	background-color: #ffffff; 
 }
 
 .mod_forum tr.even
 {
- 	background-color   		: #CECECE; 
+ 	background-color: #e6e6e6; 
 }
 
 
 /* Kategorieansicht */
-table.categories
+.mod_forum table.categories
 {
-	width					: 100%;
+	width: 100%;
 }
 
-.categories td.title
+.mod_forum .categories td.title
 {
-	background-color   		: #C0C0C0; 
-	color 					: #000000; 
-	font-size				: 16px;
-	font-weight				: bold;
-	font-family				: Arial,Helvetica,sans-serif;
-	padding					: 5px;
-	border-radius			: 7px;
+	background-color: #C0C0C0; 
+	color: #000000; 
+	font-size: 16px;
+	font-weight: bold;
+	font-family: Arial,Helvetica,sans-serif;
+	padding: 5px;
+	border-radius: 7px;
 }
 
 /* Threadansicht */
-table.threads
+.mod_forum table.threads
 {
-	width					: 100%;
+	width: 100%;
 }
 
-.threads tr.head
+.mod_forum .threads tr.head
 {
- 	background-color   		: #C0C0C0; 
- 	color 					: #000000; 
+ 	background-color: #C0C0C0; 
+ 	color: #000000; 
 }
 
-.threads th.title
+.mod_forum .threads th.title
 {
-	width					: 60%;
+	width: 60%;
 }
 
-.threads th.initdate
+.mod_forum .threads th.initdate
 {
-	width					: 20%;
+	width: 20%;
 }
 
-.threads th.actdate
+.mod_forum .threads th.actdate
 {
-	width					: 20%;
+	width: 20%;
 }
 
-.threads td.title
+.mod_forum .threads td.title
 {
-	font-size				: 16px;
-	font-weight				: bold;
+	font-size: 16px;
+	font-weight: bold;
 }
 
 /* Topicansicht */
-table.topics
+.mod_forum table.topics
 {
-	width					: 100%;
+	width: 100%;
 }
 
-.topics tr.head
+.mod_forum .topics tr.head
 {
- 	background-color   		: #C0C0C0; 
- 	color 					: #000000; 
+ 	background-color: #C0C0C0; 
+ 	color: #000000; 
 }
 
-.topics th.text
+.mod_forum .topics th.text
 {
-	width					: 80%;
+	width: 80%;
 }
 
-.topics th.topicdate
+.mod_forum .topics th.topicdate
 {
-	width					: 20%;
+	width: 20%;
 }
 
-.topics td.text
+.mod_forum .topics td.text
 {
-	font-size				: 14px;
-	color					: #27004F;
+	font-size: 14px;
+	color: #27004F;
 }
 
 /* Formularansicht */
 .mod_forum div.form
 {
-	margin					: 20px 0px 20px 0px;
+	margin: 20px 0px 20px 0px;
 }

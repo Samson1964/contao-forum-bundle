@@ -1,5 +1,12 @@
 # Forum Changelog
 
+## Version 0.0.4 (2022-01-28)
+
+* Add: Übersetzungen
+* Ausbau des Forums
+* Add: Abhängigkeit schachbulle/contao-helper-bundle für die Formulare
+* Change: CSS
+
 ## Version 0.0.3 (2021-03-19)
 
 * Fix: TinyMCE-Konfiguration geändert. TinyMCE wirkte sich auf alle Textareas aus. selector: "textarea#forum" statt mode: "textarea"

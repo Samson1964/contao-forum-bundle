@@ -12,7 +12,7 @@
 /**
  * Add palette to tl_module
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['forum'] = '{title_legend},name,type;{options_legend},forum_category,forum_allpost;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['forum'] = '{title_legend},name,type;{forum_legend},forum_category,forum_allpost;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['forum_category'] = array
 (

@@ -102,10 +102,17 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 			//),
 			'toggle' => array
 			(
-				'label'               => &$GLOBALS['TL_LANG']['tl_forum']['toggle'],
-				'icon'                => 'visible.gif',
-				'attributes'          => 'onclick="Backend.getScrollOffset();return AjaxRequest.toggleVisibility(this,%s)"',
-				'button_callback'     => array('tl_forum', 'toggleIcon') 
+				'label'                => &$GLOBALS['TL_LANG']['tl_forum']['toggle'],
+				'attributes'           => 'onclick="Backend.getScrollOffset()"',
+				'haste_ajax_operation' => array
+				(
+					'field'            => 'published',
+					'options'          => array
+					(
+						array('value' => '', 'icon' => 'invisible.svg'),
+						array('value' => '1', 'icon' => 'visible.svg'),
+					),
+				),
 			),
 			'show' => array
 			(
@@ -120,7 +127,7 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 	'palettes' => array
 	(
 		'__selector__'                => array('define_groups','define_rights'),
-		'default'                     => '{title_legend},title;{groups_legend:hide},define_groups;{rights_legend:hide},define_rights;{publish_legend},published'
+		'default'                     => '{title_legend},title,category,description;{groups_legend:hide},define_groups;{rights_legend:hide},define_rights;{publish_legend},published'
 	), 
 
 	// Subpalettes
@@ -151,14 +158,33 @@ $GLOBALS['TL_DCA']['tl_forum'] = array
 		(
 			'sql'                     => "int(10) unsigned NOT NULL default '0'"
 		),
+		'category' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['category'],
+			'exclude'                 => true,
+			'filter'                  => true,
+			'inputType'               => 'checkbox',
+			'eval'                    => array('tl_class'=>'w50 m12'),
+			'sql'                     => "char(1) NOT NULL default ''"
+		),
 		'title' => array
 		(
 			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['title'],
 			'exclude'                 => true,
 			'inputType'               => 'text',
 			'search'                  => true,
-			'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'decodeEntities'=>true),
+			'eval'                    => array('mandatory'=>true, 'maxlength'=>255, 'decodeEntities'=>true, 'tl_class'=>'w50'),
 			'sql'                     => "varchar(255) NOT NULL default ''"
+		),
+		'description' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_forum']['description'],
+			'exclude'                 => true,
+			'search'                  => true,
+			'inputType'               => 'textarea',
+			'eval'                    => array('mandatory'=>false, 'rte'=>'tinyMCE', 'helpwizard'=>true, 'tl_class'=>'clr long'),
+			'explanation'             => 'insertTags',
+			'sql'                     => "mediumtext NULL"
 		),
 		'define_groups' => array
 		(
@@ -277,7 +303,7 @@ class tl_forum extends Backend
 		
 			// Infos zur aktuellen Kategorie laden
 			$objActual = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
-							   				     ->execute(1, $cat);
+			                                     ->execute(1, $cat);
 			$breadcrumb[] = '<img src="bundles/contaoforum/images/category.png" width="18" height="18" alt=""> ' . $objActual->title;
 			
 			// Navigation vervollständigen
@@ -285,7 +311,7 @@ class tl_forum extends Backend
 			while($pid > 0)
 			{
 				$objTemp = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
-								   			       ->execute(1, $pid);
+				                                   ->execute(1, $pid);
 				$breadcrumb[] = '<img src="bundles/contaoforum/images/category.png" width="18" height="18" alt=""> <a href="' . \Controller::addToUrl('node='.$objTemp->id) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'">' . $objTemp->title . '</a>';
 				$pid = $objTemp->pid;
 			}
@@ -298,7 +324,7 @@ class tl_forum extends Backend
 		{
 			$GLOBALS['TL_DCA']['tl_forum']['list']['sorting']['breadcrumb'] .= '
 			<ul id="tl_breadcrumb">
-  				<li>' . implode(' &gt; </li><li>', $breadcrumb) . '</li>
+				<li>' . implode(' &gt; </li><li>', $breadcrumb) . '</li>
 			</ul>';
 		}
 	}
@@ -332,84 +358,17 @@ class tl_forum extends Backend
 		}
 
 		// Markiere Root-Kategorien
-		if ($row['pid'] == '0')
+		if($row['pid'] == '0')
 		{
 			$label = '<strong>' . $label . '</strong>';
 		}
 
 		// Rückgabe der Zeile
-		return \Image::getHtml($image, '', $imageAttribute) . '<a href="' . \Controller::addToUrl('node='.$row['id']) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'"> ' . $label . '</a> 
-		(<b>'.$row['links_self'].'</b>/'.$row['links_all'].')';
+		$string = \Image::getHtml($image, '', $imageAttribute) . '<a href="' . \Controller::addToUrl('node='.$row['id']) . '" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['selectNode']).'"> ' . $label . '</a>';
+		$string .= $row['category'] ? ' (<i>Kategorie</i>)' : '';
+		return $string;
 
 	}
 
-
-	/**
-	 * Return the "toggle visibility" button
-	 * @param array
-	 * @param string
-	 * @param string
-	 * @param string
-	 * @param string
-	 * @param string
-	 * @return string
-	 */
-	public function toggleIcon($row, $href, $label, $title, $icon, $attributes)
-	{
-        $this->import('BackendUser', 'User');
- 
-        if (strlen($this->Input->get('tid')))
-        {
-            $this->toggleVisibility($this->Input->get('tid'), ($this->Input->get('state') == 0));
-            $this->redirect($this->getReferer());
-        }
- 
-        // Check permissions AFTER checking the tid, so hacking attempts are logged
-        if (!$this->User->isAdmin && !$this->User->hasAccess('tl_forum::published', 'alexf'))
-        {
-            return '';
-        }
- 
-        $href .= '&amp;id='.$this->Input->get('id').'&amp;tid='.$row['id'].'&amp;state='.$row[''];
- 
-        if (!$row['published'])
-        {
-            $icon = 'invisible.gif';
-        }
- 
-        return '<a href="'.$this->addToUrl($href).'" title="'.specialchars($title).'"'.$attributes.'>'.$this->generateImage($icon, $label).'</a> ';
-	}
-
-	/**
-	 * Disable/enable a user group
-	 * @param integer
-	 * @param boolean
-	 */
-	public function toggleVisibility($intId, $blnPublished)
-	{
-		// Check permissions to publish
-		if (!$this->User->isAdmin && !$this->User->hasAccess('tl_forum::published', 'alexf'))
-		{
-			$this->log('Not enough permissions to show/hide record ID "'.$intId.'"', 'tl_forum toggleVisibility', TL_ERROR);
-			$this->redirect('contao/main.php?act=error');
-		}
-	
-		$this->createInitialVersion('tl_forum', $intId);
-	
-		// Trigger the save_callback
-		if (is_array($GLOBALS['TL_DCA']['tl_forum']['fields']['published']['save_callback']))
-		{
-			foreach ($GLOBALS['TL_DCA']['tl_forum']['fields']['published']['save_callback'] as $callback)
-			{
-				$this->import($callback[0]);
-				$blnPublished = $this->$callback[0]->$callback[1]($blnPublished, $this);
-			}
-		}
-	
-		// Update the database
-		$this->Database->prepare("UPDATE tl_forum SET tstamp=". time() .", published='" . ($blnPublished ? '' : '1') . "' WHERE id=?")
-			->execute($intId);
-		$this->createNewVersion('tl_forum', $intId);
-	}
 }
 

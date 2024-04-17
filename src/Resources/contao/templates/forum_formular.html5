@@ -1,0 +1,18 @@
+<?php $this->extend('block_unsearchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<?php if($this->form): ?>
+	<div class="form block">
+	<h2>Thema anlegen</h2>
+	<?php if($this->username): ?>
+		<b>Angemeldet als <?= $this->username ?></b>
+	<?php else: ?>
+		<b>Du schreibst als Gast!</b>
+	<?php endif; ?>
+		<?= $this->form ?>
+	</div>
+<?php endif; ?>
+
+
+<?php $this->endblock(); ?>

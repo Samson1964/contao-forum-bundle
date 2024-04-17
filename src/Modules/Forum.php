@@ -9,6 +9,7 @@ class Forum extends \Module
 {
 
 	protected $strTemplate = 'mod_forum';
+	protected $formTemplate = 'mod_forum_formular';
 	protected $threadsTemplate = 'subforum_threads';
 	protected $topicsTemplate = 'subforum_topics';
 	
@@ -36,9 +37,15 @@ class Forum extends \Module
 		else
 		{
 			// FE-Modus: URL mit allen möglichen Parametern auflösen
-			\Input::setGet('category', \Input::get('category')); // ID der Kategorie
-			\Input::setGet('thread', \Input::get('thread')); // ID des Threads
+			\Input::setGet('view', \Input::get('view')); // Ansichtsmodus: categories (Foren), threads (Themen), newthread (neues Thema)
+			\Input::setGet('fid', \Input::get('fid')); // ID des Forums/Themas
 		}
+
+		$this->import('FrontendUser', 'User');
+
+		echo "view=".\Input::get('view')."<br>";
+		echo "fid=".\Input::get('fid')."<br>";
+		echo "FORM_SUBMIT=".\Input::post('FORM_SUBMIT')."<br>";
 
 		return parent::generate(); // Weitermachen mit dem Modul
 	}
@@ -50,52 +57,7 @@ class Forum extends \Module
 	{
 		global $objPage;
 
-		$this->import('FrontendUser', 'User');
-		$session = \Session::getInstance();
-
-		/*
-		** Cookie-Auswertung
-		*/
-
-		// Cookie mit den gelesenen Themen auslesen
-		//$read_topics = unserialize($this->Input->cookie('contao-forum_read'));
-		$read_topics = unserialize($session->get('contao-forum_read'));
-		if(!is_array($read_topics)) $read_topics = array();
-
-		// ID's der Topics einlesen für Auswertung "Gelesen Ja/Nein"
-		$objTopics = \Database::getInstance()->prepare('SELECT p.id AS topic, t.pid AS category, t.id AS thread FROM tl_forum_topics p INNER JOIN tl_forum_threads t ON (p.pid = t.id) WHERE p.published = ?')
-		                                     ->execute(1);
-		// ID's vergleichen und ungelesene ID's speichern
-		$exist_topics = array();
-		$topic = array();
-		if($objTopics->numRows > 0)
-		{
-			while($objTopics->next())
-			{
-				$exist_topics[] = $objTopics->topic;
-				$topic[$objTopics->topic] = array
-				(
-					'category'  => $objTopics->category,
-					'thread'    => $objTopics->thread
-				);
-			}
-		}
-
-		// Ungelesene Topics ermitteln
-		$unread_topics = array_diff($exist_topics, $read_topics);
-		$arrCategories = array();
-		$arrThreads = array();
-		foreach($unread_topics as $item)
-		{
-			$arrCategories[] = $topic[$item]['category'];
-			$arrThreads[] = $topic[$item]['thread'];
-		}
-		// Arrays kürzen
-		$arrCategories = array_unique($arrCategories);
-		$arrThreads = array_unique($arrThreads);
-		//if($this->User->id == 1) $this->Template->debug = print_r($arrThreads, 1);
-
-		/*
+		/*********************************************************
 		** Mitglieder auslesen
 		*/
 
@@ -117,11 +79,100 @@ class Forum extends \Module
 			}
 		}
 
-		/*
-		** Ausgabe
+		/*********************************************************
+		** Ansichtsmodus
 		*/
 
-		// Topics eines Threads ausgeben
+		if(\Input::get('view'))
+		{
+			switch(\Input::get('view'))
+			{
+				case 'forum': // Forum anzeigen
+					self::ZeigeForum();
+					break;
+				case 'topic': // Thema anzeigen
+					self::ZeigeThema();
+					break;
+				case 'newtopic': // Formular für neues Thema
+					self::ZeigeThemaFormular();
+					break;
+				default: // Keine Parameter in der URL
+					self::ZeigeForum();
+			}
+			return;
+		}
+		else
+		{
+			// Keine Ansicht ausgewählt, deshalb Startseite anzeigen
+			self::ZeigeForum();
+		}
+
+		return;
+
+		/*********************************************************
+		** Ausgabe des Formular für ein neues Thema
+		*/
+
+		if(\Input::get('new_thread') && \Input::get('category'))
+		{
+			$this->Template = new \FrontendTemplate($this->formTemplate);
+
+			// Der 1. Parameter ist die Formular-ID (hier "linkform")
+			// Der 2. Parameter ist GET oder POST
+			// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
+			// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
+			// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
+			$objForm = new \Haste\Form\Form('newthreadForm', 'POST', function($objHaste)
+			{
+				return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
+			});
+			
+			// URL für action festlegen. Standard ist die Seite auf der das Formular eingebunden ist.
+			//$objForm->setFormActionFromUri(\Controller::generateFrontendUrl($objPage->row(), '/category/'.\Input::get('category')));
+			//$objForm->setFormActionFromUri(\Controller::generateFrontendUrl($objPage->row()));
+
+			$objForm->addFormField('category', array(
+				'inputType'     => 'hidden',
+				'value'         => \Input::get('category')
+			));
+			$objForm->addFormField('title', array(
+				'label'         => 'Titel des Themas',
+				'inputType'     => 'text',
+				'eval'          => array('mandatory'=>true, 'class'=>'form-control')
+			));
+			$objForm->addFormField('description', array(
+				'label'         => 'Inhalt des Themas',
+				'inputType'     => 'textarea',
+				'eval'          => array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
+			));
+			// Submit-Button hinzufügen
+			$objForm->addFormField('submit', array(
+				'label'         => 'Absenden',
+				'inputType'     => 'submit',
+				'eval'          => array('class'=>'btn btn-primary')
+			));
+			$objForm->addCaptchaFormField('captcha');
+			
+			// validate() prüft auch, ob das Formular gesendet wurde
+			if($objForm->validate())
+			{
+				// Alle gesendeten und analysierten Daten holen (funktioniert nur mit POST)
+				$arrData = $objForm->fetchAll();
+				self::saveNewThread($arrData); // Daten sichern
+				// Seite neu laden
+				\Controller::addToUrl('send=1'); // Hat keine Auswirkung, verhindert aber das das Formular ausgefüllt ist
+				\Controller::reload(); 
+			}
+
+			// Formular als String zurückgeben
+			$this->Template->form = $objForm->generate();
+
+		}
+
+		/*********************************************************
+		** Ausgabe der Beiträge (topics) eines Themas (thread)
+		*/
+
 		if(\Input::get('thread'))
 		{
 			// Eingangsbeitrag des Threads laden
@@ -172,14 +223,6 @@ class Forum extends \Module
 				}
 			}
 
-			// Gelesene und ungelesene Topics abgleichen
-			$unread_topics = array_diff($unread_topics, $arrRead);
-			// Cookie (gelesene Topics) und gerade gelesene Topics zusammenfügen, danach doppelte entfernen
-			$read_topics = array_unique(array_merge($read_topics, $arrRead));
-			$duration = time() + (3600 * 24 * 30); // max. Cookie-Alter setzen
-			//$this->setCookie('contao-forum_read', serialize($read_topics), $duration);
-			$session->set('contao-forum_read', serialize($read_topics));
-
 			// Template füllen
 			$this->Template = new \FrontendTemplate($this->topicsTemplate);
 			$this->Template->threadname = $objThread->title;
@@ -189,85 +232,199 @@ class Forum extends \Module
 			$this->Template->form = $this->SendTopicForm();
 			$this->Template->username = $this->User->username;
 		}
-		// Kategorien und Threads ausgeben
-		else
+
+	}
+
+	/***********************************************************************************
+	 * Funktion ZeigeForum
+	 * Forum anzeigen bzw. Startseite (Forenübersicht)
+	 ***********************************************************************************/
+	protected function ZeigeForum()
+	{
+		global $objPage;
+
+		$this->Template = new \FrontendTemplate('forum_categories');
+		// Gewünschte Startkategorie festlegen: fid-Wert benutzen, wenn vorhanden; ansonsten die im Modul eingestellte Kategorie
+		$this->kategorie = (\Input::get('fid')) ? \Input::get('fid') : $this->forum_category;
+
+		// Aktuelles Forum laden
+		$objCategory = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
+		                                       ->limit(1)
+		                                       ->execute(1, $this->kategorie);
+
+		if($objCategory->numRows == 0)
 		{
-			$this->Template = new \FrontendTemplate($this->threadsTemplate);
-			// Kategorie festlegen
-			$this->kategorie = (\Input::get('category')) ? \Input::get('category') : $this->forum_category;
-
-			// Aktuelle Kategorien laden
-			$objCategory = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND id = ?')
-			                                       ->execute(1, $this->kategorie);
-
-			if($objCategory->numRows == 0)
-			{
-				// Kategorie nicht gefunden, 404 ausgeben
-				$objHandler = new $GLOBALS['TL_PTY']['error_404']();
-				$objHandler->generate($objPage->id);
-			}
-
-			// Unterkategorien laden
-			$objCategories = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND pid = ? ORDER BY sorting ASC')
-			                                         ->execute(1, $this->kategorie);
-
-			$categories = array();
-			if($objCategories->numRows > 0)
-			{
-				// Datensätze anzeigen
-				while($objCategories->next())
-				{
-					// Neustatus ermitteln
-					$newstatus = (in_array($objCategories->id, $arrCategories)) ? $this->newstring : '';
-					$class = ($class == 'odd') ? 'even' : 'odd';
-					$categories[] = array
-					(
-						'title'     => $objCategories->title.$newstatus,
-						'link'      => \Controller::generateFrontendUrl($objPage->row(), '/category/'.$objCategories->id),
-						'class'     => $class,
-					);
-				}
-			}
-
-			if(!$categories && !$this->forum_allpost)
-			{
-				// Threads der aktuellen Kategorie laden
-				$objThreads = \Database::getInstance()->prepare('SELECT t.id, t.title, m.username, t.actname, t.actdate, t.initdate FROM tl_forum_threads t INNER JOIN tl_member m ON (t.name = m.id) WHERE published = ? AND pid = ? ORDER BY actdate DESC')
-				                                      ->execute(1, $this->kategorie);
-
-				$threads = array();
-				if($objThreads->numRows > 0)
-				{
-					// Datensätze anzeigen
-					while($objThreads->next())
-					{
-						// Neustatus ermitteln
-						$newstatus = (in_array($objThreads->id, $arrThreads)) ? $this->newstring : '';
-						$class = ($class == 'odd') ? 'even' : 'odd';
-						$threads[] = array
-						(
-							'title'     => $objThreads->title.$newstatus,
-							'link'      => \Controller::generateFrontendUrl($objPage->row(), '/thread/'.$objThreads->id),
-							'name'      => $objThreads->username,
-							'actname'   => $this->member[$objThreads->actname]['username'],
-							'actdate'   => date("d.m.Y H:i", $objThreads->actdate),
-							'initdate'  => date("d.m.Y H:i", $objThreads->initdate),
-							'class'     => $class,
-						);
-					}
-				}
-				$this->Template->form = $this->formThread();
-			}
-
-			// Template füllen
-			$this->Template->category = $this->kategorie;
-			$this->Template->categoryname = $objCategory->title;
-			$this->Template->categories = $categories;
-			$this->Template->threads = $threads;
-			$this->Template->username = $this->User->username;
-
-
+			// Kategorie nicht gefunden, 404 ausgeben
+			$objHandler = new $GLOBALS['TL_PTY']['error_404']();
+			$objHandler->generate($objPage->id);
 		}
+
+		$categories = array();
+
+		// Forum nur anzeigen, wenn es als Kategorie definiert ist
+		if($objCategory->category)
+		{
+			$categories[] = array
+			(
+				'title'       => $objCategory->title,
+				'description' => $objCategory->description,
+				'link'        => $objCategory->category ? '' : \Controller::generateFrontendUrl($objPage->row(), '/view/forum/fid/'.$objCategory->id),
+				'level'       => 'level0',
+				'category'    => $objCategory->category ? 'category' : '',
+			);
+		}
+
+		// Unterkategorien laden
+		$objCategories = \Database::getInstance()->prepare('SELECT * FROM tl_forum WHERE published = ? AND pid = ? ORDER BY sorting ASC')
+		                                         ->execute(1, $this->kategorie);
+
+		if($objCategories->numRows > 0)
+		{
+			// Datensätze einlesen
+			while($objCategories->next())
+			{
+				$categories[] = array
+				(
+					'title'       => $objCategories->title,
+					'description' => $objCategories->description,
+					'link'        => $objCategories->category ? '' : \Controller::generateFrontendUrl($objPage->row(), '/view/forum/fid/'.$objCategories->id),
+					'level'       => 'level1',
+					'category'    => $objCategories->category ? 'category' : '',
+				);
+			}
+		}
+
+		// Themen der aktuellen Kategorie laden
+		$objThreads = \Database::getInstance()->prepare('SELECT * FROM tl_forum_threads WHERE published = ? AND pid = ? ORDER BY responsedate DESC')
+		                                      ->execute(1, $this->kategorie);
+
+		$threads = array();
+		if($objThreads->numRows > 0)
+		{
+			// Datensätze einlesen
+			while($objThreads->next())
+			{
+				$threads[] = array
+				(
+					'title'     => $objThreads->title,
+					'link'      => \Controller::generateFrontendUrl($objPage->row(), '/view/topic/fid/'.$objThreads->id),
+					'name'      => $objThreads->username ? $objThreads->username : 'Gast',
+					'actname'   => $this->member[$objThreads->actname]['username'],
+					'actdate'   => $objThreads->responsedate ? date("d.m.Y H:i", $objThreads->responsedate) : '',
+					'initdate'  => date("d.m.Y H:i", $objThreads->initdate),
+					'class'     => $class,
+				);
+			}
+		}
+
+		// Template füllen
+		$this->Template->category = $this->kategorie;
+		$this->Template->categoryname = $objCategory->title;
+		$this->Template->categories = $categories;
+		$this->Template->threads = $threads;
+		$this->Template->username = $this->User->username;
+		$this->Template->linkNeuesThema = $objCategory->category ? '' : \Controller::generateFrontendUrl($objPage->row(), '/view/newtopic/fid/'.$this->kategorie);
+		$this->Template->nothreads = $objCategory->category ? '' : (!$threads ? 'Es gibt noch keine Themen in diesem Forum.' : '');
+	}
+
+	/***********************************************************************************
+	 * Funktion ZeigeThemaFormular
+	 * Formular für neues Thema anzeigen/auswerten
+	 ***********************************************************************************/
+	protected function ZeigeThemaFormular()
+	{
+		$this->Template = new \FrontendTemplate('forum_formular');
+
+		// Der 1. Parameter ist die Formular-ID (hier "linkform")
+		// Der 2. Parameter ist GET oder POST
+		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
+		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
+		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
+		$objForm = new \Haste\Form\Form('newthreadForm', 'POST', function($objHaste)
+		{
+			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
+		});
+		
+		// URL für action festlegen. Standard ist die Seite auf der das Formular eingebunden ist.
+		//$objForm->setFormActionFromUri(\Controller::generateFrontendUrl($objPage->row(), '/category/'.\Input::get('category')));
+		//$objForm->setFormActionFromUri(\Controller::generateFrontendUrl($objPage->row()));
+
+		$objForm->addFormField('forum', array(
+			'inputType'     => 'hidden',
+			'value'         => \Input::get('fid')
+		));
+		$objForm->addFormField('title', array(
+			'label'         => 'Titel des Themas',
+			'inputType'     => 'text',
+			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
+		));
+		$objForm->addFormField('description', array(
+			'label'         => 'Inhalt des Themas',
+			'inputType'     => 'textarea',
+			'eval'          => array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
+		));
+		// Submit-Button hinzufügen
+		$objForm->addFormField('submit', array(
+			'label'         => 'Absenden',
+			'inputType'     => 'submit',
+			'eval'          => array('class'=>'btn btn-primary')
+		));
+		$objForm->addCaptchaFormField('captcha');
+		
+		// validate() prüft auch, ob das Formular gesendet wurde
+		if($objForm->validate())
+		{
+			// Alle gesendeten und analysierten Daten holen (funktioniert nur mit POST)
+			$arrData = $objForm->fetchAll();
+			self::SpeichereThema($arrData); // Daten sichern
+			// Seite neu laden
+			//\Controller::addToUrl('send=1'); // Hat keine Auswirkung, verhindert aber das das Formular ausgefüllt ist
+			//\Controller::reload(); 
+		}
+
+		// Formular als String zurückgeben
+		$this->Template->form = $objForm->generate();
+	}
+	
+	protected function SpeichereThema($data)
+	{
+		print_r($data);
+		// Datenbank aktualisieren
+		$zeit = time();
+		$data['title'] = html_entity_decode($data['title']);
+		$data['text'] = html_entity_decode($data['text']);
+
+		// Threads-Tabelle aktualisieren
+		$set = array
+		(
+			'pid'       => $data['forum'],
+			'tstamp'    => $zeit,
+			'initdate'  => $zeit,
+			'userid'    => $this->User->id ? $this->User->id : 0,
+			'username'  => $this->User->username,
+			'title'     => $data['title'],
+			'published' => 1,
+		);
+		$objThread = \Database::getInstance()->prepare('INSERT INTO tl_forum_threads %s')
+		                                     ->set($set)
+		                                     ->execute();
+		$insertId = $objThread->insertId;
+
+		// Topics-Tabelle aktualisieren
+		$set = array
+		(
+			'pid'       => $insertId,
+			'tstamp'    => $zeit,
+			'topicdate' => $zeit,
+			'userid'    => $this->User->id ? $this->User->id : 0,
+			'username'  => $this->User->username,
+			'title'     => $data['title'],
+			'text'      => $data['text'],
+			'published' => 1,
+		);
+		$objTopic = \Database::getInstance()->prepare('INSERT INTO tl_forum_topics %s')
+		                                    ->set($set)
+		                                    ->execute();
 
 	}
 
@@ -335,7 +492,7 @@ class Forum extends \Module
 
 	}
 
-	protected function saveNewThread($data)
+	protected function saveNewThread_old($data)
 	{
 		//print_r($data);
 		$zeit = time();
@@ -344,38 +501,38 @@ class Forum extends \Module
 		// Threads-Tabelle aktualisieren
 		$set = array
 		(
-			'pid' 		=> $data['category'],
-			'name' 		=> $data['member'],
-			'tstamp' 	=> $zeit,
-			'initdate' 	=> $zeit,
-			'actdate' 	=> $zeit,
-			'actname'	=> $data['member'],
-			'title' 	=> $data['title'],
+			'pid'       => $data['category'],
+			'name'      => $data['member'],
+			'tstamp'    => $zeit,
+			'initdate'  => $zeit,
+			'actdate'   => $zeit,
+			'actname'   => $data['member'],
+			'title'     => $data['title'],
 			'published' => 1,
 		);
 		$objThread = \Database::getInstance()->prepare('INSERT INTO tl_forum_threads %s')
-										     ->set($set)
-										     ->execute();
+		                                     ->set($set)
+		                                     ->execute();
 		$insertId = $objThread->insertId;
 
 		// Topics-Tabelle aktualisieren
 		$set = array
 		(
-			'pid' 		=> $insertId,
-			'tstamp' 	=> $zeit,
-			'topicdate'	=> $zeit,
-			'name' 		=> $data['member'],
-			'title' 	=> $data['title'],
-			'text' 		=> $data['text'],
+			'pid'       => $insertId,
+			'tstamp'    => $zeit,
+			'topicdate' => $zeit,
+			'name'      => $data['member'],
+			'title'     => $data['title'],
+			'text'      => $data['text'],
 			'published' => 1,
 		);
 		$objTopic = \Database::getInstance()->prepare('INSERT INTO tl_forum_topics %s')
-										    ->set($set)
-										    ->execute();
+		                                    ->set($set)
+		                                    ->execute();
 
 		// Mailinfo erstellen, alle Mitglieder auslesen
 		$objTopics = \Database::getInstance()->prepare('SELECT id, email, firstname, lastname, username FROM tl_member')
- 						   				     ->execute();
+ 		                                     ->execute();
 
 		$mails = array();
 		if($objTopics->numRows > 0)
@@ -401,14 +558,13 @@ class Forum extends \Module
 		// Kommentar zusammenbauen
 		$objEmail->html = 'Autor/in: <b>'.$username."</b><br>Titel: <b>".$data['title']."</b><br>Text: <b>".$data['text'].'</b><br><a href="'.$url.'">'.$url.'</a>';
 		//$objEmail->sendTo($mails);
-  	}
+	}
 
 	protected function SendTopicForm()
 	{
 		global $objPage;
 
 		$this->import('FrontendUser', 'User');
-
 
 	}
 
@@ -422,30 +578,30 @@ class Forum extends \Module
 		// Threads-Tabelle aktualisieren
 		$set = array
 		(
-			'actdate' 	=> $zeit,
-			'actname'	=> $data['member'],
+			'responsedate'   => $zeit,
+			'actname'        => $data['member'],
 		);
 		$objThread = \Database::getInstance()->prepare('UPDATE tl_forum_threads %s WHERE id = ?')
-										     ->set($set)
-										     ->execute($data['thread']);
+		                                     ->set($set)
+		                                     ->execute($data['thread']);
 
 		// Topics-Tabelle aktualisieren
 		$set = array
 		(
-			'pid' 		=> $data['thread'],
-			'tstamp' 	=> $zeit,
-			'topicdate'	=> $zeit,
-			'name' 		=> $data['member'],
-			'text' 		=> $data['text'],
+			'pid'       => $data['thread'],
+			'tstamp'    => $zeit,
+			'topicdate' => $zeit,
+			'name'      => $data['member'],
+			'text'      => $data['text'],
 			'published' => 1,
 		);
 		$objTopic = \Database::getInstance()->prepare('INSERT INTO tl_forum_topics %s')
-										    ->set($set)
-										    ->execute();
+		                                    ->set($set)
+		                                    ->execute();
 
 		// Mailinfo erstellen, zuerst Mitglieder auslesen
 		$objTopics = \Database::getInstance()->prepare('SELECT id, email, firstname, lastname, username FROM tl_member')
- 						   				     ->execute();
+ 		                                     ->execute();
 
 		$mails = array();
 		if($objTopics->numRows > 0)
@@ -471,7 +627,7 @@ class Forum extends \Module
 		// Kommentar zusammenbauen
 		$objEmail->html = 'Autor/in: <b>'.$username."</b><br>Titel: <b>".$data['text'].'</b><br><a href="'.$url.'">'.$url.'</a>';
 		//$objEmail->sendTo($mails);
-  	}
+	}
 
 	static function showBBcodes($text)
 	{

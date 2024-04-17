@@ -1,5 +1,17 @@
 # Forum Changelog
 
+## Version 0.1.0 (2024-04-17)
+
+* Add: Beschreibungsfeld für Foren
+* Change: Forum als eigener Bereich im Backend-Menü
+* Add: Abhängigkeit codefog/contao-haste
+* Delete: Checkbox Themen im Startforum
+* Add: Checkbox ob Forum als Kategorie dargestellt werden soll
+* Change: Layout Forenübersicht
+* Add: Abhängigkeit codefog/contao-haste
+* Add: PHP-8-Unterstützung
+* Add: Haste-Toggler
+
 ## Version 0.0.4 (2022-01-28)
 
 * Add: Übersetzungen

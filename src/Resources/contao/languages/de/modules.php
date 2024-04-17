@@ -3,7 +3,8 @@
 /**
  * Backend-Modul Übersetzungen
  */
-$GLOBALS['TL_LANG']['MOD']['forum'] = array('Forum', 'Forum verwalten');
+$GLOBALS['TL_LANG']['MOD']['forum'] = 'Forum';
+$GLOBALS['TL_LANG']['MOD']['tl_forum_foren'] = array('Foren', 'Foren verwalten');
 
 /**
  * Frontendmodule

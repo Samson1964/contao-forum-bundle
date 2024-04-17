@@ -13,4 +13,3 @@
 $GLOBALS['TL_LANG']['tl_module']['forum_legend'] = 'Forum-Einstellungen';
 
 $GLOBALS['TL_LANG']['tl_module']['forum_category'] = array('Startforum', 'Forum, das als Startpunkt genutzt werden soll.');
-$GLOBALS['TL_LANG']['tl_module']['forum_allpost'] = array('Überall schreiben', 'Themen können auch im Startforum erstellt werden.');

@@ -9,12 +9,22 @@
 				<tr class="<?= $b['class'] ?>">
 					<td class="title"><a href="<?= $b['link'] ?>"><?= $b['title'] ?></a></td>
 				</tr>
+				<?php if($b['description']): ?>
+					<tr>
+						<td class="description"><?= $b['description'] ?></td>
+					</tr>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		</table>
 		</div>
 	<?php endif; ?>
 
 	<?php if($this->threads): ?>
+
+		<?php if($this->linkNeuesThema): ?>
+			<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
+		<?php endif; ?>
+
 		<div class="threads block">
 		<table class="threads">
 			<tr class="head">
@@ -34,18 +44,21 @@
 			<?php endforeach; ?>
 		</table>
 		</div>
-	<?php endif; ?>
 
-	<?php if($this->form): ?>
-		<div class="form block">
-		<h2>Thema anlegen</h2>
-		<?php if($this->username): ?>
-			<b>Angemeldet als <?= $this->username ?></b>
-		<?php else: ?>
-			<b>Du schreibst als Gast!</b>
+		<?php if($this->linkNeuesThema): ?>
+			<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
 		<?php endif; ?>
-			<?= $this->form ?>
+
+	<?php else: ?>
+
+		<div class="threads block">
+			Es gibt noch keine Themen in diesem Forum.
 		</div>
+
+		<?php if($this->linkNeuesThema): ?>
+			<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
+		<?php endif; ?>
+
 	<?php endif; ?>
 
 	<?php if($this->debug): ?>

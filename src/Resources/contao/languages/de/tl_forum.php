@@ -15,7 +15,9 @@ $GLOBALS['TL_LANG']['tl_forum']['show'] = array('Forumdetails anzeigen', 'Detail
  * Backend-Modul: Übersetzungen im Eingabeformular
  */
 $GLOBALS['TL_LANG']['tl_forum']['title_legend'] = 'Titel';
-$GLOBALS['TL_LANG']['tl_forum']['title'] = array('Titel', 'Name des Forums');
+$GLOBALS['TL_LANG']['tl_forum']['title'] = array('Titel', 'Name/Titel des Forums');
+$GLOBALS['TL_LANG']['tl_forum']['category'] = array('Kategorie', 'Forum als Kategorie behandeln. Hier können keine Themen angelegt werden.');
+$GLOBALS['TL_LANG']['tl_forum']['description'] = array('Beschreibung', 'Der Beschreibungstext wird unterhalb des Titels angezeigt.');
 
 $GLOBALS['TL_LANG']['tl_forum']['groups_legend'] = 'Mitgliedergruppen';
 $GLOBALS['TL_LANG']['tl_forum']['define_groups'] = array('Mitgliedergruppen festlegen', 'Wählen Sie dieses Auswahlfeld, um dem Forum Mitgliedergruppen zuzuweisen. Wenn Sie keine Mitgliedergruppen festlegen, dann gelten die Zuweisungen aus dem übergeordneten Forums.');

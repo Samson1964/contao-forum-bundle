@@ -1,0 +1,73 @@
+﻿<?php $this->extend('block_unsearchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<h2><?= $this->categoryname ?></h2>
+
+<?php if($this->categories): ?>
+
+	<?php if($this->linkNeuesThema): ?>
+		<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
+	<?php endif; ?>
+
+	<div class="categories block">
+		<table class="categories">
+			<?php foreach($this->categories as $b): ?>
+				<tr>
+					<td class="title <?= $b['level'] ?> <?= $b['category'] ?>"><?php if($b['link']): ?><a href="<?= $b['link'] ?>"><?php endif; ?><?= $b['title'] ?><?php if($b['link']): ?></a><?php endif; ?></td>
+				</tr>
+				<?php if($b['description']): ?>
+					<tr>
+						<td class="description <?= $b['level'] ?> <?= $b['category'] ?>"><?= $b['description'] ?></td>
+					</tr>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</table>
+	</div>
+
+<?php endif; ?>
+
+
+<?php if($this->threads): ?>
+
+	<?php if($this->linkNeuesThema): ?>
+		<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
+	<?php endif; ?>
+
+	<div class="threads block">
+	<table class="threads">
+		<tr class="head">
+			<th class="title">Thema</th>
+			<th class="initdate">Erstellt am/von</th>
+			<th class="actdate">Antwort am/von</th>
+		</tr>
+		<?php foreach($this->threads as $b): ?>
+			<tr>
+				<td colspan="3" class="abstand"></td>
+			</tr>
+			<tr class="<?= $b['class'] ?>">
+				<td class="title"><a href="<?= $b['link'] ?>"><?= $b['title'] ?></a></td>
+				<td class="initdate"><?= $b['initdate'] ?><br><?= $b['name'] ?></td>
+				<td class="actdate"><?= $b['actdate'] ?><br><?= $b['actname'] ?></td>
+			</tr>
+		<?php endforeach; ?>
+	</table>
+	</div>
+
+	<?php if($this->linkNeuesThema): ?>
+		<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
+	<?php endif; ?>
+
+<?php else: ?>
+
+	<div class="threads block">
+		<?= $this->nothreads ?>
+	</div>
+
+	<?php if($this->linkNeuesThema): ?>
+		<a href="<?= $this->linkNeuesThema ?>" class="button">Neues Thema erstellen</a>
+	<?php endif; ?>
+
+<?php endif; ?>
+
+<?php $this->endblock(); ?><

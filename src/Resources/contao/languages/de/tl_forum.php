@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * Global
+ */
+$GLOBALS['TL_LANG']['tl_forum']['maintitle'] = 'Forum';
+
+/**
  * Buttons für Operationen
  */
 $GLOBALS['TL_LANG']['tl_forum']['new'] = array('Neues Forum', 'Neues Forum anlegen');
@@ -9,7 +14,6 @@ $GLOBALS['TL_LANG']['tl_forum']['copy'] = array('Forum kopieren', 'Forum %s kopi
 $GLOBALS['TL_LANG']['tl_forum']['delete'] = array('Forum löschen', 'Forum %s löschen');
 $GLOBALS['TL_LANG']['tl_forum']['toggle'] = array('Forum aktivieren/deaktivieren', 'Forum %s aktivieren/deaktivieren');
 $GLOBALS['TL_LANG']['tl_forum']['show'] = array('Forumdetails anzeigen', 'Details der Forum %s anzeigen');
-
 
 /**
  * Backend-Modul: Übersetzungen im Eingabeformular

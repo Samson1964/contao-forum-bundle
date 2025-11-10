@@ -1,5 +1,11 @@
 # Forum Changelog
 
+## Version 0.1.1 (2025-11-10)
+
+* Fix: Warning: Undefined array key "maintitle"
+* Fix: Attempted to load class "Form" from namespace "Haste\Form".
+* Fix: Warning: Undefined array key "text" in Modules/Forum.php:395
+
 ## Version 0.1.0 (2024-04-17)
 
 * Add: Beschreibungsfeld für Foren

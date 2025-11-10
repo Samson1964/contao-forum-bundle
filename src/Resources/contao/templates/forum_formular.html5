@@ -2,6 +2,8 @@
 
 <?php $this->block('content'); ?>
 
+<div class="pfad"><?= $this->pfadnavigation ?></div>
+
 <?php if($this->form): ?>
 	<div class="form block">
 	<h2>Thema anlegen</h2>

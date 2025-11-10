@@ -122,7 +122,7 @@ class Forum extends \Module
 			// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
 			// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
 			// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-			$objForm = new \Haste\Form\Form('newthreadForm', 'POST', function($objHaste)
+			$objForm = new \Codefog\HasteBundle\Form\Form('newthreadForm', 'POST', function($objHaste)
 			{
 				return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 			});
@@ -140,7 +140,7 @@ class Forum extends \Module
 				'inputType'     => 'text',
 				'eval'          => array('mandatory'=>true, 'class'=>'form-control')
 			));
-			$objForm->addFormField('description', array(
+			$objForm->addFormField('text', array(
 				'label'         => 'Inhalt des Themas',
 				'inputType'     => 'textarea',
 				'eval'          => array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
@@ -340,7 +340,7 @@ class Forum extends \Module
 		// Der 3. Parameter ist eine Funktion, die entscheidet wann das Formular gesendet wird (Third is a callable that decides when your form is submitted)
 		// Der optionale 4. Parameter legt fest, ob das ausgegebene Formular auf Tabellen basiert (true)
 		// oder nicht (false) (You can pass an optional fourth parameter (true by default) to turn the form into a table based one)
-		$objForm = new \Haste\Form\Form('newthreadForm', 'POST', function($objHaste)
+		$objForm = new \Codefog\HasteBundle\Form\Form('newthreadForm', 'POST', function($objHaste)
 		{
 			return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
 		});
@@ -358,7 +358,7 @@ class Forum extends \Module
 			'inputType'     => 'text',
 			'eval'          => array('mandatory'=>true, 'class'=>'form-control')
 		));
-		$objForm->addFormField('description', array(
+		$objForm->addFormField('text', array(
 			'label'         => 'Inhalt des Themas',
 			'inputType'     => 'textarea',
 			'eval'          => array('mandatory'=>true, 'rte'=>'tinyMCE', 'class'=>'form-control')
@@ -551,7 +551,7 @@ class Forum extends \Module
 		$objEmail = new \Email();
 		$objEmail->from = $GLOBALS['TL_ADMIN_EMAIL'];
 		$objEmail->fromName = $GLOBALS['TL_ADMIN_NAME'];
-		$objEmail->subject = 'Neues Thema in Swifteliblue\'s Leichtgewichte-Blog';
+		$objEmail->subject = 'Neues Thema im Forum';
 
 		$url = 'http://leichtgewicht.swifteliblue.de/index/thread/'.$insertId.'.html';
 
@@ -620,7 +620,7 @@ class Forum extends \Module
 		$objEmail = new \Email();
 		$objEmail->from = $GLOBALS['TL_ADMIN_EMAIL'];
 		$objEmail->fromName = $GLOBALS['TL_ADMIN_NAME'];
-		$objEmail->subject = 'Neuer Beitrag in Swifteliblue\'s Leichtgewichte-Blog';
+		$objEmail->subject = 'Neuer Beitrag im Forum';
 
 		$url = 'http://leichtgewicht.swifteliblue.de/index/thread/'.$data['thread'].'.html';
 

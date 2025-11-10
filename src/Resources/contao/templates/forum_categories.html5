@@ -2,6 +2,8 @@
 
 <?php $this->block('content'); ?>
 
+<div class="pfad"><?= $this->pfadnavigation ?></div>
+
 <h2><?= $this->categoryname ?></h2>
 
 <?php if($this->categories): ?>
